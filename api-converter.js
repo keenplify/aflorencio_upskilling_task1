@@ -1,6 +1,6 @@
 const fs = require("fs");
 const filePath = process.argv[2];
-const minimumLength = process.argv[3] || 3;
+const minimumLength = process.argv[3] || 1;
 
 fs.readFile(filePath, "utf8", (_, data) => {
   let wordsCache = {};
@@ -9,9 +9,14 @@ fs.readFile(filePath, "utf8", (_, data) => {
     .split("\r\n")
     .forEach((line) => recursion(wordsCache, {}, line, 0, minimumLength));
 
-  const sorted = sortObjectbyValue(wordsCache, false);
-  const ranking = Object.keys(sorted);
-  console.log(ranking[0]);
+  let highestRankingKey = Object.keys(wordsCache)[0];
+
+  Object.keys(wordsCache).forEach((word) => {
+    if (wordsCache[word] > wordsCache[highestRankingKey])
+      highestRankingKey = word;
+  });
+
+  console.log(highestRankingKey);
 });
 
 // Cache stores the count of words in object,
@@ -33,12 +38,4 @@ function recursion(cache, localcache = {}, string, fromIndex, substrLength) {
 
   //Move to next step
   return recursion(cache, localcache, string, fromIndex, substrLength + 1);
-}
-
-function sortObjectbyValue(obj = {}, asc = true) {
-  const ret = {};
-  Object.keys(obj)
-    .sort((a, b) => obj[asc ? a : b] - obj[asc ? b : a])
-    .forEach((s) => (ret[s] = obj[s]));
-  return ret;
 }
